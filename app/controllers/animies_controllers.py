@@ -10,11 +10,11 @@ def create():
     data = request.get_json()
     try:
         new_data = Animes(**data)
-        result = Animes.create_anime(new_data)
+        result = Animes.create_anime(new_data.__dict__)
     except UniqueViolation:
         return {"error": "anime is already exists"}, HTTPStatus.UNPROCESSABLE_ENTITY
     except KeyError as e:
-        return {"available_keys": ["anime", "released_date", "seasons"], "wrong_keys_sended": e.args}, HTTPStatus.UNPROCESSABLE_ENTITY
+        return {"required_keys": ["anime", "released_date", "seasons"], "missing_keys": e.args}, HTTPStatus.UNPROCESSABLE_ENTITY
     
     new_result = Animes.serialized_animes(result)
 
@@ -47,13 +47,19 @@ def update(id):
     get = request.get_json()
     try:
         data = Animes.update_animes(get, id)
+        data_serialized = Animes.serialized_animes(data)
+    except UniqueViolation:
+        return {"error": "anime is already exists"}, HTTPStatus.UNPROCESSABLE_ENTITY
     except UndefinedColumn as e:
         text = str(e.args).split('"')[1]
         return {"available_keys": ["anime", "released_date", "seasons"], "wrong_keys_sended": [f"{text}"]}, HTTPStatus.UNPROCESSABLE_ENTITY
-    except UndefinedTable:
+    except (UndefinedTable, TypeError):
         return {"error": "Not Found"}, HTTPStatus.NOT_FOUND
+    except KeyError as e:
+        text = str(e.args).replace("(", "").replace(")", "").replace(",", "").replace("'", "")
+        return {"available_keys": ["anime", "released_date", "seasons"], "wrong_keys_sended": [f"{text}"]}, HTTPStatus.UNPROCESSABLE_ENTITY
 
-    data_serialized = Animes.serialized_animes(data)
+    
 
     return data_serialized, HTTPStatus.OK
 

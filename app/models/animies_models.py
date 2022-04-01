@@ -11,6 +11,10 @@ class Animes(ConectionBD):
         self.seasons = kwargs["seasons"]
 
 
+    @staticmethod
+    def check_keys():
+        keys_validate = ["anime", "released_date", "seasons"]
+
     @classmethod
     def create_anime(cls, data: dict):
         cls.openConection()
@@ -35,10 +39,9 @@ class Animes(ConectionBD):
                 *;
         """
 
-        # values = (data['anime'].title, data['released_date'], data['seasons'])
-        values = data.__dict__.values()
-        # print(values)
-        cls.cur.execute(query, tuple(values))
+        values = (data['anime'].title(), data['released_date'], data['seasons'])
+        
+        cls.cur.execute(query, values)
 
         result = cls.cur.fetchone()
 
@@ -94,11 +97,34 @@ class Animes(ConectionBD):
 
 
     @classmethod
-    def update_animes(cls, data: dict, id):
+    def update_animes(cls, data, id):
         cls.openConection()
 
+        # key = [i for i in data.keys()]
+        # value = [i for i in data.values()]
+        # if len(key) >=1 and "anime" in str(key):
+        #     data_1 = dict(zip(key, value))
+        #     data_1["anime"] = data_1["anime"].title()
+        #     keys = [sql.Identifier(key) for key in data_1.keys()]
+        #     values = [sql.Literal(value) for value in data_1.values()]
+
+        # elif len(key) == 1 and "anime" in str(key):
+        #     data_1 = dict(zip(key, value))
+        #     data_1["anime"] = data_1["anime"].title()
+        #     keys = [sql.Identifier(key) for key in data_1.keys()]
+        #     values = [sql.Literal(value) for value in data_1.values()]
+        # else:
+        #     keys = [sql.Identifier(key) for key in data.keys()]
+        #     values = [sql.Literal(value) for value in data.values()]
+
+
+        if data.get("anime"):
+            data["anime"] = data["anime"].title()
+        
         keys = [sql.Identifier(key) for key in data.keys()]
         values = [sql.Literal(value) for value in data.values()]
+        
+
 
         query = sql.SQL(
             """
