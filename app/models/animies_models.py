@@ -1,5 +1,3 @@
-import numbers
-from unittest import result
 from psycopg2 import sql
 from app.models import ConectionBD
 
